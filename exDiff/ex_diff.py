@@ -21,7 +21,7 @@ def optSettings():
         type    = "str",
         dest    = "delim",
         default = "",
-        help    = ""
+        help    = "Set the delimiter of the source file and target file."
     )
 
     parser.add_option(
@@ -30,7 +30,7 @@ def optSettings():
         type    = "str",
         dest    = "sdelim",
         default = "",
-        help    = ""
+        help    = "Set the delimiter of the source file. (priority than delimiter option.)"
     )
 
     parser.add_option(
@@ -39,7 +39,7 @@ def optSettings():
         type    = "str",
         dest    = "tdelim",
         default = "",
-        help    = ""
+        help    = "Set the delimiter of the target file. (priority than delimiter option.)"
     )
 
     parser.add_option(
@@ -48,7 +48,7 @@ def optSettings():
         type    = "str",
         dest    = "odelim",
         default = None,
-        help    = ""
+        help    = "Set the delimiter of output. "
     )
 
     parser.add_option(
@@ -57,7 +57,7 @@ def optSettings():
         type    = "int",
         dest    = "field",
         default = None,
-        help    = ""
+        help    = "Set the field of the source file and target file. (Start of the index is 0)"
     )
 
     parser.add_option(
@@ -66,7 +66,7 @@ def optSettings():
         type    = "int",
         dest    = "sfield",
         default = None,
-        help    = ""
+        help    = "Set the field of the source file. (priority than field option.)"
     )
 
     parser.add_option(
@@ -75,7 +75,7 @@ def optSettings():
         type    = "int",
         dest    = "tfield",
         default = None,
-        help    = ""
+        help    = "Set the field of the target file. (priority than field option.)"
     )
 
     parser.add_option(
@@ -83,7 +83,7 @@ def optSettings():
         action  = "store_true",
         dest    = "unique",
         default = False,
-        help    = ""
+        help    = "Output fields that do not exist in the target. (Output is stderr.)"
     )
 
     parser.add_option(
@@ -91,7 +91,7 @@ def optSettings():
         action  = "store_true",
         dest    = "count",
         default = False,
-        help    = ""
+        help    = "Display the counting result."
     )
 
     parser.add_option(
@@ -99,7 +99,7 @@ def optSettings():
         action  = "store_true",
         dest    = "only",
         default = False,
-        help    = ""
+        help    = "Only the output target of the key."
     )
 
     parser.add_option(
@@ -107,7 +107,7 @@ def optSettings():
         action  = "store_true",
         dest    = "debug",
         default = False,
-        help    = ""
+        help    = "Output error messages."
     )
 
     return parser.parse_args()
