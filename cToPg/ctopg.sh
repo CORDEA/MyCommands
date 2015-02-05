@@ -17,7 +17,7 @@
 # date: 2015-01-30
 
 filename=$1
-comment=$2
+candidate=$2
 
 # check arguments
 if [ -z $filename ]; then
@@ -26,17 +26,14 @@ if [ -z $filename ]; then
 fi
 
 # beginning of the comments
-if [ -z $comment ]; then
-    # default
-    comment='#'
-else
-    if [ ${#comment} -gt 1 ]; then
-        echo "comment should be specified in one character."
-        exit 1
-    fi
+# default
+comment="#"
+
+if [ ! -z $candidate ] ; then
+    comment=$candidate
 fi
 
-for line in `cat $filename`; do
-    # run a bash command
-    eval `echo $line | cut -d $comment -f 2`
+IFS=$comment eval 'arr=(`cat $filename`)'
+for var in ${arr[*]}; do
+    eval $var
 done
