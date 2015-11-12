@@ -6,6 +6,7 @@ proc exec(cmd: string) =
     discard execCmd("clear")
 
     let (output, err) = execCmdEx(cmd)
+    echo(getLocalTime(getTime()), "\n")
     echo(output)
 
 proc loop(cmd: string, n: int) =
