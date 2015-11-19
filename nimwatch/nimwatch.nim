@@ -11,6 +11,9 @@ type
         x: int
         y: int
 
+var
+    win: window
+
 proc getScreenSize(): window =
     var
         x, y: int
@@ -27,7 +30,9 @@ proc getHeader(cmd: string, n: int, x: int): string =
     let left  = "Every " & $n & "s: " & cmd
     let right = format(date, "ddd',' dd MMM yyyy HH:mm:ss")
     let space = x - (left.len + right.len)
-    result = left & " ".repeat(space) & right
+    result = left & " " & right
+    if space > 0:
+        result = left & " ".repeat(space) & right
     return
 
 proc getOutput(cmd: string): string =
@@ -42,7 +47,7 @@ proc echo(inp: varargs[string]) =
     if outp.len > 0:
         discard execCmd("echo '" & outp & "'")
 
-proc outputToScreen(outp: string, cmd:string, ni: int, win: window) =
+proc outputToScreen(outp: string, cmd:string, ni: int) =
     let header = 2
     echo(getHeader(cmd, ni, win.x), "\n")
     var lignes = split(outp, "\n")
@@ -50,12 +55,12 @@ proc outputToScreen(outp: string, cmd:string, ni: int, win: window) =
         if i < (win.y - header) - 1:
             echo(v)
 
-proc exec(cmd: string, n: int, win: window) =
+proc exec(cmd: string, n: int) =
     discard execCmd("clear")
     let output = getOutput(cmd)
-    outputToScreen(output, cmd, n, win)
+    outputToScreen(output, cmd, n)
 
-proc asyncExec(cmd: string, ni: int, win: window) =
+proc asyncExec(cmd: string, ni: int) =
     let n = float(ni)
     proc onAsyncCompleted(outp: string, cmd: string, bef: float) =
         let bet = toSeconds(getTime()) - bef
@@ -63,27 +68,27 @@ proc asyncExec(cmd: string, ni: int, win: window) =
         if slpSec > 0:
             sleep(slpSec)
         discard execCmd("clear")
-        outputToScreen(outp, cmd, ni, win)
-        asyncExec(cmd, ni, win)
+        outputToScreen(outp, cmd, ni)
+        asyncExec(cmd, ni)
     let bef = toSeconds(getTime())
     let outp = ^(spawn getOutput(cmd))
     onAsyncCompleted(outp, cmd, bef)
 
-proc loop(cmd: string, n: int, win: window) =
+proc loop(cmd: string, n: int) =
     while true:
-        exec(cmd, n, win)
+        exec(cmd, n)
         sleep(n * 1000)
 
-proc loopAsync(cmd: string, n: int, win: window) =
-    exec(cmd, n, win)
-    asyncExec(cmd, n, win)
+proc loopAsync(cmd: string, n: int) =
+    exec(cmd, n)
+    asyncExec(cmd, n)
 
 when isMainModule:
     var
         cmd: string
         n: int
-        async: bool = false
-    let win:window = getScreenSize()
+        async, vs: bool = false
+    win = getScreenSize()
     for kind, key, val in getopt():
         case kind
         of cmdArgument:
@@ -94,11 +99,14 @@ when isMainModule:
                 n = parseInt(val)
             of "async":
                 async = true
+            # TODO
+            of "vs", "variable-screen":
+                vs = true
             else: discard
         of cmdEnd:
             discard
     if cmd != nil and n != 0:
         if async:
-            loopAsync(cmd, n, win)
+            loopAsync(cmd, n)
         else:
-            loop(cmd, n, win)
+            loop(cmd, n)
