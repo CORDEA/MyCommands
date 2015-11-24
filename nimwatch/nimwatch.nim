@@ -14,6 +14,10 @@ type
 var
     win: window
 
+proc handleControlC() {.noconv.} =
+    echo "exit"
+    quit(0)
+
 proc getScreenSize(): window =
     var
         x, y: int
@@ -88,6 +92,7 @@ when isMainModule:
         cmd: string
         n: int
         async, vs: bool = false
+    setControlCHook(handleControlC)
     win = getScreenSize()
     for kind, key, val in getopt():
         case kind
