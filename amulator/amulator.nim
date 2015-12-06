@@ -17,19 +17,41 @@ date  : 2015-12-05
 """
 
 import os, osproc
+import re
 import parseopt2
 
-proc launch(name: string, arch: string) =
+proc getEmulators():seq[string] =
+    var
+        arr: seq[string] = @[]
+        matches: array[1, string]
+    let envName = "HOME"
+    if existsEnv envName:
+        let home = getEnv envName
+        let androidPath = home & "/.android"
+        if existsDir androidPath:
+            if existsDir androidPath & "/avd":
+                for path in walkDirRec(androidPath & "/avd", {pcFile}):
+                    if find(path, re"(\w+)\.ini$", matches) >= 0:
+                        arr.add matches[0]
+    return arr
+
+proc launch(name: string, arch: string, is32bit: bool) =
     let envName = "ANDROID_HOME"
     if existsEnv(envName):
         let home = getEnv(envName)
         echo "found environment variable " & home
-        discard execCmd(home & "/emulator64-" & arch & " @" & name)
+        var prog = "/emulator"
+        if is32bit:
+            prog &= "-"
+        else:
+            prog &= "64-"
+        discard execCmd(home & prog & arch & " @" & name)
 
 when isMainModule:
     var
         arch: string
         name: string
+        is32bit: bool
 
     for kind, key, val in getopt():
         case kind
@@ -39,7 +61,10 @@ when isMainModule:
                 arch = val
             of "n", "name":
                 name = val
+            of "32bit":
+                is32bit = true
             else: discard
         else: discard
 
-    launch(name, arch)
+    launch(name, arch, is32bit)
+    discard getEmulators()
