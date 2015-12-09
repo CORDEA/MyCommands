@@ -34,21 +34,21 @@ var
 
 proc handleControlC() {.noconv.} =
     echo "exit"
-    quit(0)
+    quit 0
 
 proc getScreenSize(): window =
     var
         x, y: int
         win: window
-    new(win)
+    new win
     getmaxyx(initscr(), y, x)
     endwin()
     win.x = x
     win.y = y
     return win
 
-proc getHeader(cmd: string, n: int, x: int): string =
-    let date = getLocalTime(getTime())
+proc getHeader(cmd: string, n, x: int): string =
+    let date = getLocalTime getTime()
     let left  = "Every " & $n & "s: " & cmd
     let right = format(date, "ddd',' dd MMM yyyy HH:mm:ss")
     let space = x - (left.len + right.len)
@@ -58,42 +58,42 @@ proc getHeader(cmd: string, n: int, x: int): string =
     return
 
 proc getOutput(cmd: string): string =
-    let (outp, _) = execCmdEx(cmd)
+    let (outp, _) = execCmdEx cmd
     return outp
 
 proc echo(inp: varargs[string]) =
     var outp = ""
-    for s in items(inp):
+    for s in items inp:
         if s != nil:
             outp = outp & s
     if outp.len > 0:
         discard execCmd("echo '" & outp & "'")
 
-proc outputToScreen(outp: string, cmd:string, ni: int) =
+proc outputToScreen(outp, cmd:string, ni: int) =
     let header = 2
     echo(getHeader(cmd, ni, win.x), "\n")
     var lignes = split(outp, "\n")
     for i, v in lignes:
         if i < (win.y - header) - 1:
-            echo(v)
+            echo v
 
 proc exec(cmd: string, n: int) =
-    discard execCmd("clear")
-    let output = getOutput(cmd)
+    discard execCmd "clear"
+    let output = getOutput cmd
     outputToScreen(output, cmd, n)
 
 proc asyncExec(cmd: string, ni: int) =
-    let n = float(ni)
+    let n = float ni
     proc onAsyncCompleted(outp: string, cmd: string, bef: float) =
         let bet = toSeconds(getTime()) - bef
         let slpSec = int(math.ceil((n - bet) * 1000))
         if slpSec > 0:
-            sleep(slpSec)
-        discard execCmd("clear")
+            sleep slpSec
+        discard execCmd "clear"
         outputToScreen(outp, cmd, ni)
         asyncExec(cmd, ni)
-    let bef = toSeconds(getTime())
-    let outp = ^(spawn getOutput(cmd))
+    let bef = toSeconds getTime()
+    let outp = ^(spawn getOutput cmd)
     onAsyncCompleted(outp, cmd, bef)
 
 proc loop(cmd: string, n: int) =
@@ -110,7 +110,7 @@ when isMainModule:
         cmd: string
         n: int
         async, vs: bool = false
-    setControlCHook(handleControlC)
+    setControlCHook handleControlC
     win = getScreenSize()
     for kind, key, val in getopt():
         case kind
@@ -119,7 +119,7 @@ when isMainModule:
         of cmdLongOption, cmdShortOption:
             case key
             of "n":
-                n = parseInt(val)
+                n = parseInt val
             of "async":
                 async = true
             # TODO

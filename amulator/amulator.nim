@@ -58,7 +58,7 @@ proc launch(name, arch, options: string, is32bit: bool) =
         let fullpath = home & prog & arch
         if not existsFile fullpath:
             echo(fullpath, " not found")
-            quit(1)
+            quit 1
         discard execCmd(fullpath & " @" & name & " " & options)
 
 when isMainModule:
@@ -94,6 +94,6 @@ when isMainModule:
             echo("find api: ", name ?? "not found")
     if name == nil:
         echo "name is nil, quit."
-        quit(1)
+        quit 1
 
     launch(name, arch, options, is32bit)
