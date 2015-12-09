@@ -20,6 +20,10 @@ import os, osproc
 import re
 import parseopt2
 
+proc `??`(x, y: string): string =
+    # x ?? y
+    result = if x != nil: x else: y
+
 proc getEmulators():seq[string] =
     var
         arr: seq[string] = @[]
@@ -42,24 +46,28 @@ proc findApi(devices:openarray[string], expect:string):string =
             if matches[0] == expect:
                 return device
 
-proc launch(name: string, arch: string, is32bit: bool) =
+proc launch(name, arch, options: string, is32bit: bool) =
     let envName = "ANDROID_HOME"
-    if existsEnv(envName):
-        let home = getEnv(envName)
-        echo "found environment variable " & home
+    if existsEnv envName:
+        let home = getEnv envName
         var prog = "/tools/emulator"
         if is32bit:
             prog &= "-"
         else:
             prog &= "64-"
-        discard execCmd(home & prog & arch & " @" & name)
+        let fullpath = home & prog & arch
+        if not existsFile fullpath:
+            echo(fullpath, " not found")
+            quit(1)
+        discard execCmd(fullpath & " @" & name & " " & options)
 
 when isMainModule:
     var
-        arch: string = "x86"
         name: string
         api: string
         is32bit: bool
+        arch: string = "x86"
+        options: string = ""
 
     for kind, key, val in getopt():
         case kind
@@ -68,23 +76,24 @@ when isMainModule:
         of cmdLongOption, cmdShortOption:
             case key
             of "arch":
-                arch = if val == nil: arch else: val
+                arch = val ?? arch
             of "a", "api":
                 api = val
             of "32bit":
                 is32bit = true
+            of "option":
+                options = val ?? options
             else: discard
         else: discard
     
     let arr = getEmulators()
 
-    echo("name ", name, " api ", api)
     if name == nil:
         if api != nil:
             name = findApi(arr, api)
-            echo("find api: ", (if name == nil: "not found" else: name))
+            echo("find api: ", name ?? "not found")
     if name == nil:
         echo "name is nil, quit."
         quit(1)
 
-    launch(name, arch, is32bit)
+    launch(name, arch, options, is32bit)
