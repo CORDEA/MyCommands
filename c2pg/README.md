@@ -9,15 +9,15 @@ First argument : input file name
 Second argument: comment character
 
 ```bash
-% ./ctopg.sh hoge.txt "#"
+% ./c2pg.sh hoge.txt "#"
 ```
 
 ###If you use as a command(for Mac)
 
 ```bash
-% mv ctopg.sh /path/to/dir/ctopg
-% chown root:wheel /path/to/dir/ctopg # for Mac
-% chmod 755 /path/to/dir/ctopg
+% mv c2pg.sh /path/to/dir/c2pg
+% chown root:wheel /path/to/dir/c2pg # for Mac
+% chmod 755 /path/to/dir/c2pg
 ```
 
 ##Like this
@@ -33,8 +33,8 @@ test.txt
 run
 
 ```bash
-% ./ctopg.sh test.txt
-README.md       ctopg.sh        test.txt
-/path/to/dir/myCommands/cToPg
-./ctopg.sh: line 41: aaa: command not found
+% ./c2pg.sh test.txt
+README.md       c2pg.sh        test.txt
+/path/to/dir/myCommands/c2pg
+./c2pg.sh: line 41: aaa: command not found
 ```
