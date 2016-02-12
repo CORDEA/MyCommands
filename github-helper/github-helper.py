@@ -59,12 +59,6 @@ class bg_color:
     GRN = "\033[1;42m"
     RED = "\033[1;41m"
     END = "\033[1;m"
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
 
 class font_color:
     GRN = "\033[1;32m"
