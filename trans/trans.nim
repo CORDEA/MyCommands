@@ -51,10 +51,16 @@ proc getAccessToken(): string =
             scope = [ "http://api.microsofttranslator.com" ]
             response = clientCredsGrant(url, creds[0], creds[1], scope, false)
             obj = parseJson(response.body)
-            expiresIn = obj["expires_in"].str
-            epochTime = epochTime()
-        token = obj["access_token"].str
-        tokenFile.writeFile([$epochTime, expiresIn, token].join ",")
+
+        if obj.hasKey("expires_in") and obj.hasKey("access_token"):
+            let
+                expiresIn = obj["expires_in"].str
+                epochTime = epochTime()
+            token = obj["access_token"].str
+            tokenFile.writeFile([$epochTime, expiresIn, token].join ",")
+        else:
+            echo "access token failed to get. response: " & response.body
+            quit 1
 
     return token 
 
