@@ -25,14 +25,20 @@ proc getAccessToken(): string =
         url = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13"
         tokenFile = "tokens.txt"
         credFile = "credentials.txt"
+        credDir = ".trans/"
+
+    let
+        home = getEnv("HOME")
+        credPath = home / credDir / credFile
+        tokenPath = home / credDir / tokenFile
 
     var
         needRefresh = false
         token: string
 
-    if tokenFile.fileExists():
+    if tokenPath.fileExists():
         let
-            text = tokenFile.readFile()
+            text = tokenPath.readFile()
             texts = text.strip().split(",")
             epoch = parseFloat(texts[0])
             expiresIn = parseFloat(texts[1])
@@ -46,7 +52,7 @@ proc getAccessToken(): string =
 
     if needRefresh:
         let
-            cred = credFile.readFile()
+            cred = credPath.readFile()
             creds = cred.strip().split(",")
             scope = [ "http://api.microsofttranslator.com" ]
             response = clientCredsGrant(url, creds[0], creds[1], scope, false)
@@ -57,7 +63,7 @@ proc getAccessToken(): string =
                 expiresIn = obj["expires_in"].str
                 epochTime = epochTime()
             token = obj["access_token"].str
-            tokenFile.writeFile([$epochTime, expiresIn, token].join ",")
+            tokenPath.writeFile([$epochTime, expiresIn, token].join ",")
         else:
             echo "access token failed to get. response: " & response.body
             quit 1
@@ -100,4 +106,3 @@ when isMainModule:
             to = "en"
         let token = getAccessToken()
         echo trans(token, text, frm, to)
-
