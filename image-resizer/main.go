@@ -5,28 +5,13 @@ import (
     "log"
     "io/ioutil"
     "flag"
-    "math"
-    "github.com/disintegration/imaging"
 )
 
 var (
     per = flag.Float64("p", 1.0, "Reduction percentage of the image")
+    w = flag.Int("w", 0, "Width of image")
+    h = flag.Int("h", 0, "Height of image")
 )
-
-func resize(images []string, per float64) {
-    for _, name := range images {
-        img, err := imaging.Open(name)
-        if err == nil {
-            size := img.Bounds().Size()
-            width := int(math.Ceil(float64(size.X) * per))
-            img := imaging.Resize(img, width, 0, imaging.Lanczos)
-            err = imaging.Save(img, name)
-        }
-        if err != nil {
-            log.Fatalln(err)
-        }
-    }
-}
 
 func getImages(path string) []string {
     images := make([]string, 0)
@@ -56,7 +41,10 @@ func main() {
     if flag.NArg() == 0 {
         log.Fatalln("Required argument is missing.")
     }
+
     path := flag.Arg(0)
     images := getImages(path)
-    resize(images, *per)
+    if err := Resize(images, *per, *w, *h); err != nil {
+        log.Fatalln(err)
+    }
 }
