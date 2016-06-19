@@ -17,11 +17,20 @@
 import os
 import strutils, sequtils
 
+proc addLastChar(x: string): string =
+    if x[len(x) - 1] == '"':
+        if x[len(x) - 2] == ',':
+            return x & "\""
+    else:
+        return x & "\""
+    return x
+
 proc readFiles(files: seq[string]): seq[string] =
     let
-        cont1 = files[0].readFile().split("\n")
-        cont2 = files[1].readFile().split("\n")
-    result = deduplicate(concat(cont1, cont2))
+        cont1 = files[0].readFile().split("\"\n")
+        cont2 = files[1].readFile().split("\"\n")
+        ded = deduplicate(concat(cont1, cont2))
+    result = ded.map(addLastChar)
     
 when isMainModule:
     let params = commandLineParams()
