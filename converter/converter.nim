@@ -15,7 +15,7 @@
 # date  : 2016-06-19
 
 import os
-import strutils
+import strutils, sequtils
 
 proc getParsedString(parsed: seq[string], idx: int): string =
     return if len(parsed) > idx: "\"" & parsed[idx] & "\"" else: "\"\""
@@ -26,7 +26,6 @@ proc convert(filename: string): seq[string] =
         parsed: seq[string]
         r: seq[string]
     result = @[]
-    result.add "\"name\",\"url\",\"username\",\"password\",\"extra\""
     for line in file.split("\"\n"):
         let conts = line.split("\",\"")
         parsed = @[]
@@ -41,9 +40,24 @@ proc convert(filename: string): seq[string] =
                 c = ""
             parsed.add c
         r = @[]
-        for i in 0..4:
-            r.add getParsedString(parsed, i)
+        if   len(parsed) > 4:
+            if parsed[1] == "" and parsed[3] == "":
+                continue
+            for i in 0..4:
+                r.add getParsedString(parsed, i)
+        elif len(parsed) > 3:
+            if parsed[1] == "" and parsed[2] == "":
+                continue
+            for i in 0..1:
+                r.add getParsedString(parsed, i)
+            r.add "\"\""
+            r.add getParsedString(parsed, 2)
+            r.add getParsedString(parsed, 3)
+        else:
+            continue
         result.add r.join ","
+    result = deduplicate(result)
+    result.insert("\"name\",\"url\",\"username\",\"password\",\"extra\"", 0)
 
 when isMainModule:
     let params = commandLineParams()
