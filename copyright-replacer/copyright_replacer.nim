@@ -14,12 +14,13 @@
 # Author: Yoshihiro Tanaka <contact@cordea.jp>
 # date  :2016-09-01
 
-import os, osproc, pegs, strutils, subexes, times
+import os, osproc, pegs
+import strutils, subexes, times
 
 const
   copyright = """'Copyright' \s* \[* {\d+} \]* \s* \[* {\w+ \s* \w+} \]*"""
   initialCopyright = "Copyright {yyyy} {name of copyright owner}"
-  temp = "Copyright $# $#"
+  copyrightTemplate = "Copyright $# $#"
 
 type
   SyntaxError = object of Exception
@@ -48,7 +49,7 @@ proc getLatestCopyright(name: string = "", year: int = -1): string =
     name = getDefaultName()
     if name.isNilOrWhitespace():
       raise newException(GitConfigurationError, "")
-  result = subex(temp) % [yearString, name]
+  result = subex(copyrightTemplate) % [yearString, name]
 
 proc handleMatches(m: int, n: int, c: openarray[string]): string = 
   if n == 2:
@@ -58,7 +59,7 @@ proc handleMatches(m: int, n: int, c: openarray[string]): string =
     result = getLatestCopyright(name, year)
   else:
     raise newException(SyntaxError, "")
-    
+
 proc replace(filename: string) =
   let pattern = peg(copyright)
   var lines = filename.readFile()
