@@ -14,30 +14,58 @@
 # Author: Yoshihiro Tanaka <contact@cordea.jp>
 # date  :2016-09-01
 
-import os, pegs, strutils, subexes, times
+import os, osproc, pegs, strutils, subexes, times
 
 const
   copyright = """'Copyright' \s* \[* {\d+} \]* \s* \[* {\w+ \s* \w+} \]*"""
+  initialCopyright = "Copyright {yyyy} {name of copyright owner}"
   temp = "Copyright $# $#"
 
 type
   SyntaxError = object of Exception
+  CommandError = object of Exception
+  GitConfigurationError = object of Exception
+
+proc getDefaultName(): string =
+  let (output, code) = execCmdEx("git config --get user.name")
+  if code != 0:
+    raise newException(CommandError, output)
+  result = output.strip()
+
+proc getLatestCopyright(name: string = "", year: int = -1): string =
+  var
+    yearString = $year
+    name = name
+  let
+    currentYear = getLocalTime(getTime()).year
+
+  if year < 1:
+    yearString = $currentYear
+  elif year != currentYear:
+    yearString = subex("$#-$#") % [$year, $currentYear]
+
+  if name.isNilOrWhitespace():
+    name = getDefaultName()
+    if name.isNilOrWhitespace():
+      raise newException(GitConfigurationError, "")
+  result = subex(temp) % [yearString, name]
 
 proc handleMatches(m: int, n: int, c: openarray[string]): string = 
   if n == 2:
-    var arr: array[2, string] = [c[0], c[1]]
     let
-      year = parseInt(arr[0])
-      currentYear = getLocalTime(getTime()).year
-    if year != currentYear:
-      arr[0] = subex("$#-$#") % [$year, $currentYear]
-    result = subex(temp) % arr
+      name = c[1]
+      year = parseInt(c[0])
+    result = getLatestCopyright(name, year)
   else:
     raise newException(SyntaxError, "")
     
 proc replace(filename: string) =
+  let pattern = peg(copyright)
   var lines = filename.readFile()
-  lines = lines.replace(peg(copyright), handleMatches)
+  if lines.match(pattern):
+    lines = lines.replace(pattern, handleMatches)
+  else:
+    lines = lines.replace(initialCopyright, getLatestCopyright())
   let newfile = filename & "_new"
   let writef = newfile.open(fmWrite)
   writef.write lines
