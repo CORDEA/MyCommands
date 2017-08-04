@@ -61,15 +61,16 @@ proc handleMatches(m: int, n: int, c: openarray[string]): string =
     raise newException(SyntaxError, "")
 
 proc replace(filename: string) =
-  let pattern = peg(copyright)
-  var lines = filename.readFile()
-  if lines.match(pattern):
-    lines = lines.replace(pattern, handleMatches)
-  else:
-    lines = lines.replace(initialCopyright, getLatestCopyright())
+  let
+    pattern = peg(copyright)
+    lines = filename.readFile()
+  var replacedLines = lines
+  replacedLines = replacedLines.replace(pattern, handleMatches)
+  if lines == replacedLines:
+    replacedLines = replacedLines.replace(initialCopyright, getLatestCopyright())
   let newfile = filename & "_new"
   let writef = newfile.open(fmWrite)
-  writef.write lines
+  writef.write replacedLines
   writef.close()
   newfile.moveFile filename
 
