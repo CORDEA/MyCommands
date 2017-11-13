@@ -19,7 +19,7 @@ import strutils, subexes, times
 
 const
   copyright = """'Copyright' \s* \[* {\d+} \]* \s* \[* {\w+ \s* \w+} \]*"""
-  initialCopyright = "Copyright {yyyy} {name of copyright owner}"
+  initialCopyright = "Copyright [yyyy] [name of copyright owner]"
   copyrightTemplate = "Copyright $# $#"
 
 type
